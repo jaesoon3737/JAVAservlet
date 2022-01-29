@@ -1,0 +1,40 @@
+package NoticeBoard.Client;
+
+import board.mvc.model.BoardService;
+
+import java.util.ArrayList;
+
+import NoticeBoardClient.domain.BoardClientMember;
+
+public class ClientService {
+	private ClientDAO dao;
+	private static ClientService instance = new ClientService();
+	public ClientService() {
+		dao = new ClientDAO();
+	}
+	
+	public static ClientService getInstance() {
+		return instance;
+	}
+	
+	public int loginS(BoardClientMember dto) {
+		return dao.login(dto); // id 로그인
+	}
+	
+	public int logincheckS(String cid) {
+		return dao.logincheck(cid); // id 로그인
+	}
+	
+	public ArrayList<BoardClientMember> loginSS(String cid, String cpassword ) {
+		return dao.logins(cid , cpassword ); // id 로그인
+	}
+	
+	public boolean joinS(String clientID) {
+		return dao.join(clientID); // 중복체크
+	}
+	
+	public boolean joinSS(String cid, String cpassword, String name) {
+		return dao.joins(cid, cpassword, name); // insert 회원가입
+	}
+	
+}
