@@ -1,0 +1,66 @@
+package NoticeBoardClient.domain;
+
+public class BoardClientMember {
+		
+	private int cnumber;
+	private String cid;
+	private String cpassword;
+	private String name;
+	private int authority;
+	
+	public BoardClientMember() {
+		super();
+	}
+	
+	public BoardClientMember(int cnumber, String cid, String cpassword, String name, int authority) {
+		super();
+		this.cnumber = cnumber;
+		this.cid = cid;
+		this.cpassword = cpassword;
+		this.name = name;
+		this.authority = authority;
+	}
+
+	public int getCnumber() {
+		return cnumber;
+	}
+
+	public void setCnumber(int cnumber) {
+		this.cnumber = cnumber;
+	}
+
+	public String getCid() {
+		return cid;
+	}
+
+	public void setCid(String cid) {
+		this.cid = cid;
+	}
+
+	public String getCpassword() {
+		return cpassword;
+	}
+
+	public void setCpassword(String cpassword) {
+		this.cpassword = cpassword;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public int getAuthority() {
+		return authority;
+	}
+
+	public void setAuthority(int authority) {
+		this.authority = authority;
+	}
+	
+
+	
+}
