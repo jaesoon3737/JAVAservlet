@@ -1,0 +1,8 @@
+package NoticeBoard.Client;
+
+class ClientSQL {
+	final static String LOGIN = " SELECT * FROM BoardClientMember where CID = ?";
+	final static String JOIN = " SELECT * FROM BoardClientMember";
+	final static String JOINS = " INSERT INTO BoardClientMember VALUES (BoardClientMember_SEQ.nextval , ? , ? , ? , default)";
+	final static String LOGINS = " SELECT * FROM BoardClientMember where CID = ?";
+}
