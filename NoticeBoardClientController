@@ -1,0 +1,123 @@
+package NoticeBoardClientControl;
+
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import NoticeBoard.Client.ClientService;
+import NoticeBoardClient.domain.BoardClientMember;
+
+@WebServlet("/boardk/clientLogin")
+public class NoticeBoardClientController extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+       
+ 
+    public NoticeBoardClientController() {
+        super();
+  
+    }
+
+	public void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			String mesagge = request.getParameter("mesagge");
+			String check = request.getParameter("check");
+			if(mesagge!=null) {
+				mesagge.trim();
+				switch(mesagge) {
+					case "login" : login(request, response); break;
+					case "join" : join(request,response); break;
+					case "joins" : {
+						if(check.equals("중복체크")) {
+							joinS(request,response); break;
+					}else if(check.equals("회원가입")){
+							joinSS(request,response); break;
+					}}
+					case "logout" : logout(request,response); break;
+					case "logins" : loginS(request,response); break;
+					case "logincheck" : logincheckS(request,response); break;
+				}
+			}else {
+				response.sendRedirect("../Client_mvc/index.jsp");
+			}
+	}
+	
+	public void logincheckS(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			ClientService service = ClientService.getInstance();
+			String cid = request.getParameter("cid");
+			int s = service.logincheckS(cid);
+			request.setAttribute("cid", s);
+			RequestDispatcher rd = request.getRequestDispatcher("../Client_mvc/joinn.html");
+			 rd.forward(request, response);
+	}
+	
+	public void login(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			ClientService service = ClientService.getInstance();
+			String id = request.getParameter("cid");
+			String password = request.getParameter("cpassword");
+			String name = request.getParameter("name");
+			BoardClientMember dto = new BoardClientMember(-1 ,id , password , name , -1);
+			int k = service.loginS(dto);
+			request.setAttribute("flag", k);
+			
+			 RequestDispatcher rd = request.getRequestDispatcher("../Client_mvc/login.jsp");
+			 rd.forward(request, response);
+	}
+	
+	
+	public void join(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			response.sendRedirect("../Client_mvc/joinn.html");
+	}
+	
+	public void logout(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+			response.sendRedirect("../Client_mvc/logout.jsp");
+	}
+	
+	public void joinS(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ClientService service = ClientService.getInstance();
+		String id = request.getParameter("cid");
+		boolean flag = service.joinS(id);
+		request.setAttribute("flagJ", flag);
+		RequestDispatcher rd = request.getRequestDispatcher("../Client_mvc/joins.jsp");
+		rd.forward(request, response);
+	}
+	
+	public void loginS(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ClientService service = ClientService.getInstance();
+		String id = request.getParameter("cid");
+		String password = request.getParameter("cpassword");
+		if( id == null || id.equals("") || password==null || id.equals("")) {
+			response.sendRedirect("../Client_mvc/index.jsp");
+		}else {
+			ArrayList<BoardClientMember>  list = service.loginSS(id , password);
+			request.setAttribute("loginJ", list);
+			RequestDispatcher rd = request.getRequestDispatcher("../Client_mvc/logins.jsp");
+			rd.forward(request, response);
+		}
+	}
+	
+	public void joinSS(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		ClientService service = ClientService.getInstance();
+		String id = request.getParameter("cid");
+		String password = request.getParameter("cpassword");
+		String passwordcheck = request.getParameter("cpasswordcheck");
+		String name = request.getParameter("name");
+			if(id == null || password == null || name == null || name.equals("") || password.equals("") || id.equals("")) {
+				response.sendRedirect("../Client_mvc/joinsk.jsp");
+			}else {		
+				if(passwordcheck.equals(password)) {
+						boolean flag = service.joinSS(id , password , name);
+						request.setAttribute("flagS", flag);
+						RequestDispatcher rd = request.getRequestDispatcher("../Client_mvc/joinss.jsp");
+						rd.forward(request, response);
+				}else {
+						response.sendRedirect("../Client_mvc/joinsk.jsp");
+				}
+			}	
+			
+	}
+
+}
