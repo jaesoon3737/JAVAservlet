@@ -1,0 +1,208 @@
+package NoticeBoard.Client;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.sql.DataSource;
+
+import NoticeBoardClient.domain.BoardClientMember;
+
+class ClientDAO {
+	private DataSource ds;
+	public ClientDAO() {
+		try { // InitialContext은 웹어플리케이션이 처음 배치 될 때 사용됨.
+			Context inContext = new InitialContext(); // 어떤일을 하기위해서 제공하는 정보 Context 라이브러리에 있는 거찾아오려 고 처음에 생성하고
+			Context envContext = (Context)inContext.lookup("java:/comp/env"); // JNDI resource라고 함 자원의 위치 라이브러리를 들고오는거저장
+			ds = (DataSource)envContext.lookup("jdbc/myoracle"); // 커넥션풀 들고오기
+		}catch(NamingException ne){		
+			ne.printStackTrace();
+		}
+	}
+	
+	int login(BoardClientMember dto) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = ClientSQL.LOGIN;
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			if(dto.getCid() != null) {
+				pstmt.setString(1, dto.getCid());
+			}else {
+				return -1;
+			}
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				String cid = rs.getString("cid");
+				if(cid.equalsIgnoreCase(dto.getCid())) {
+					String ps = rs.getString("cpassword");
+					if(ps != null) {
+						if(ps.equalsIgnoreCase(dto.getCpassword())){							
+							return 1;
+						}else {
+							return -1;
+						}
+					}else {
+						return -1;
+					}
+				}else {
+					return -1;
+				}	
+			}
+		}catch(SQLException se) {
+			se.printStackTrace();
+			return -1;
+		}finally {
+			try {
+				if(rs !=null) rs.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
+			}catch(SQLException se) {
+				se.printStackTrace();
+			}
+		}return -1;
+	}
+	int logincheck(String cid) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = ClientSQL.LOGIN;
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			if(cid != null) {
+				pstmt.setString(1, cid);
+			}else {
+				return -1;
+			}
+			rs = pstmt.executeQuery();
+			cid.trim();
+			if( rs.next() || cid.equals("")) {
+				return -1;
+			}else {
+				return 1;
+			}
+		}catch(SQLException se) {
+			se.printStackTrace();
+			return -1;
+		}finally {
+			try {
+				if(rs !=null) rs.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
+			}catch(SQLException se) {
+				se.printStackTrace();
+			}
+		}
+	}
+	ArrayList<BoardClientMember> logins(String cid ,String cpassword ){
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = ClientSQL.LOGINS;
+		ArrayList<BoardClientMember> list = new ArrayList<BoardClientMember>();
+		if(cid!=null) {
+			try {
+				con = ds.getConnection();
+				pstmt = con.prepareStatement(sql);
+				pstmt.setString(1, cid);
+						rs = pstmt.executeQuery();
+						while(rs.next()) {
+							int number = rs.getInt(1);
+							String id = rs.getString(2);
+							String password = rs.getString(3);
+							String name = rs.getString(4);
+							int atu = rs.getInt(5);
+								if(cpassword.equals(password)) {
+									list.add(new BoardClientMember(number, id, password, name, atu));
+									return list;
+								}else {
+									return null;
+								}
+						}
+			    }catch(SQLException se) {
+                    se.printStackTrace();
+						return null;
+				}finally {
+					try {
+						if(rs !=null) rs.close();
+						if(pstmt != null) pstmt.close();
+						if(con != null) con.close();
+				}catch(SQLException se) {
+					se.printStackTrace();
+				}
+			}
+		}return null;
+		
+	}
+	
+	boolean join(String clientID) {
+		Connection con = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql = ClientSQL.JOIN;
+		try {
+			con = ds.getConnection();
+			pstmt = con.prepareStatement(sql);
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				String idcheck = rs.getString("cid");
+				if(idcheck !=null) {
+					idcheck.trim();
+					if(idcheck.equalsIgnoreCase(clientID)) {
+						return false;
+					}else{
+						return true;
+					}
+				}else{
+					return false;
+				}
+			}return false;	
+		}catch(SQLException se) {
+			se.printStackTrace();	
+		}finally {
+			try {
+				if(rs !=null) rs.close();
+				if(pstmt != null) pstmt.close();
+				if(con != null) con.close();
+			}catch(SQLException se) {
+				se.printStackTrace();
+			}
+		}return false;
+	}
+
+	boolean joins(String cid, String cpassword, String name) {
+			Connection con = null;
+			PreparedStatement pstmt = null;
+			String sql = ClientSQL.JOINS;
+			try {
+				con = ds.getConnection();
+				pstmt = con.prepareStatement(sql);
+				pstmt.setString(1, cid);
+				pstmt.setString(2, cpassword);
+				pstmt.setString(3, name);
+				int i = pstmt.executeUpdate();
+				if(i>0) {
+					return true;
+				}else {
+					return false;
+				}			
+			}catch(SQLException se) {
+				se.printStackTrace();
+			}finally {
+				try {
+					if(pstmt != null) pstmt.close();
+					if(con != null) con.close();
+				}catch(SQLException se) {
+					se.printStackTrace();
+				}
+			}return false;
+	}
+}
